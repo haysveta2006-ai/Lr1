@@ -139,7 +139,19 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Base.cpp" />
+    <ClCompile Include="Keeper.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Administrator.cpp" />
+    <ClCompile Include="Student.cpp" />
+    <ClCompile Include="Teacher.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Administrator.h" />
+    <ClInclude Include="Base.h" />
+    <ClInclude Include="Keeper.h" />
+    <ClInclude Include="Student.h" />
+    <ClInclude Include="Teacher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
