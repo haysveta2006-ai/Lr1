@@ -1,0 +1,7 @@
+1
+STUDENT
+Ivanov
+IK-15
+Informatics
+3
+4

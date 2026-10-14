@@ -2,342 +2,115 @@
 #include "Student.h"
 #include "Teacher.h"
 #include "Administrator.h"
-
 #include <iostream>
 #include <fstream>
-#include <stdexcept>
-#include <string>
+#include <exception>
 
-Keeper::Keeper() : items(nullptr), size(0), capacity(2)
-{
-    items = new Base * [capacity];
-    std::cout << "Вызван конструктор Keeper" << std::endl;
+class KeeperException : public std::exception {
+    std::string msg;
+public:
+    KeeperException(const std::string& m) : msg(m) {}
+    const char* what() const noexcept override { return msg.c_str(); }
+};
+
+Keeper::Keeper() : items(nullptr), count(0), capacity(0) {
+    std::cout << "[Keeper] Default constructor" << std::endl;
 }
 
-Keeper::Keeper(const Keeper& other)
-    : items(nullptr), size(0), capacity(other.capacity)
-{
-    items = new Base * [capacity];
-
-    try
-    {
-        for (int i = 0; i < other.size; i++)
-        {
-            if (Student* p = dynamic_cast<Student*>(other.items[i]))
-                items[size++] = new Student(*p);
-            else if (Teacher* p = dynamic_cast<Teacher*>(other.items[i]))
-                items[size++] = new Teacher(*p);
-            else if (Administrator* p =
-                dynamic_cast<Administrator*>(other.items[i]))
-                items[size++] = new Administrator(*p);
-            else
-                throw std::runtime_error("Неизвестный тип объекта.");
-        }
-    }
-    catch (...)
-    {
-        for (int i = 0; i < size; i++)
-            delete items[i];
-
-        delete[] items;
-        throw;
-    }
-
-    std::cout << "Вызван конструктор копирования Keeper" << std::endl;
+Keeper::Keeper(const Keeper& other) : items(nullptr), count(0), capacity(0) {
+    std::cout << "[Keeper] Copy constructor" << std::endl;
+    for (int i = 0; i < other.count; ++i) add(other.items[i]);
 }
 
-Keeper& Keeper::operator=(const Keeper& other)
-{
-    if (this == &other)
-        return *this;
-
-    Keeper temp(other);
-
-    Base** oldItems = items;
-    int oldSize = size;
-    int oldCapacity = capacity;
-
-    items = temp.items;
-    size = temp.size;
-    capacity = temp.capacity;
-
-    temp.items = oldItems;
-    temp.size = oldSize;
-    temp.capacity = oldCapacity;
-
-    return *this;
-}
-
-Keeper::~Keeper()
-{
-    for (int i = 0; i < size; i++)
-        delete items[i];
-
+Keeper::~Keeper() {
+    for (int i = 0; i < count; ++i) delete items[i];
     delete[] items;
-
-    std::cout << "Вызван деструктор Keeper" << std::endl;
+    std::cout << "[Keeper] Destructor" << std::endl;
 }
 
-void Keeper::resize()
-{
-    int newCapacity = capacity * 2;
-    Base** newItems = new Base * [newCapacity];
-
-    for (int i = 0; i < size; i++)
-        newItems[i] = items[i];
-
+void Keeper::resize() {
+    int newCap = (capacity == 0) ? 4 : capacity * 2;
+    Base** newItems = new Base * [newCap];
+    for (int i = 0; i < count; ++i) newItems[i] = items[i];
     delete[] items;
     items = newItems;
-    capacity = newCapacity;
+    capacity = newCap;
 }
 
-void Keeper::add(Base* item)
-{
-    if (item == nullptr)
-        throw std::invalid_argument("Нельзя добавить пустой объект.");
-
-    if (size == capacity)
-        resize();
-
-    items[size++] = item;
+void Keeper::add(Base* obj) {
+    if (count >= capacity) resize();
+    items[count++] = obj;
+    std::cout << "Object added. Total: " << count << std::endl;
 }
 
-void Keeper::remove(int index)
-{
-    if (index < 0 || index >= size)
-        throw std::out_of_range("Неверный номер объекта.");
-
+void Keeper::remove(int index) {
+    if (index < 0 || index >= count)
+        throw KeeperException("Invalid index for remove!");
     delete items[index];
-
-    for (int i = index; i < size - 1; i++)
-        items[i] = items[i + 1];
-
-    size--;
+    for (int i = index; i < count - 1; ++i) items[i] = items[i + 1];
+    --count;
+    std::cout << "Object removed." << std::endl;
 }
 
-void Keeper::edit(int index)
-{
-    if (index < 0 || index >= size)
-        throw std::out_of_range("Неверный номер объекта.");
-
-    if (Student* p = dynamic_cast<Student*>(items[index]))
-    {
-        std::string fullName, group, specialty;
-        int course;
-        double averageGrade;
-
-        std::cout << "Введите ФИО: ";
-        std::cin >> fullName;
-        std::cout << "Введите группу: ";
-        std::cin >> group;
-        std::cout << "Введите специальность: ";
-        std::cin >> specialty;
-        std::cout << "Введите курс: ";
-
-        if (!(std::cin >> course))
-            throw std::invalid_argument("Курс должен быть числом.");
-
-        std::cout << "Введите средний балл: ";
-
-        if (!(std::cin >> averageGrade))
-            throw std::invalid_argument("Средний балл должен быть числом.");
-
-        if (course < 1 || averageGrade < 0 || averageGrade > 5)
-            throw std::invalid_argument("Недопустимый курс или средний балл.");
-
-        p->setFullName(fullName);
-        p->setGroup(group);
-        p->setSpecialty(specialty);
-        p->setCourse(course);
-        p->setAverageGrade(averageGrade);
-    }
-    else if (Teacher* p = dynamic_cast<Teacher*>(items[index]))
-    {
-        std::string fullName, groups, subjects;
-
-        std::cout << "Введите ФИО: ";
-        std::cin >> fullName;
-        std::cout << "Введите группы: ";
-        std::cin >> groups;
-        std::cout << "Введите предметы: ";
-        std::cin >> subjects;
-
-        p->setFullName(fullName);
-        p->setGroups(groups);
-        p->setSubjects(subjects);
-    }
-    else if (Administrator* p =
-        dynamic_cast<Administrator*>(items[index]))
-    {
-        std::string fullName, position, phone, area;
-
-        std::cout << "Введите ФИО: ";
-        std::cin >> fullName;
-        std::cout << "Введите должность: ";
-        std::cin >> position;
-        std::cout << "Введите телефон: ";
-        std::cin >> phone;
-        std::cout << "Введите область ответственности: ";
-        std::cin >> area;
-
-        p->setFullName(fullName);
-        p->setPosition(position);
-        p->setPhone(phone);
-        p->setResponsibilityArea(area);
-    }
-    else
-    {
-        throw std::runtime_error("Неизвестный тип объекта.");
-    }
-
-    std::cout << "Объект изменён." << std::endl;
-}
-
-void Keeper::print() const
-{
-    if (size == 0)
-    {
-        std::cout << "Список пуст." << std::endl;
+void Keeper::printAll() const {
+    if (count == 0) {
+        std::cout << "List is empty." << std::endl;
         return;
     }
-
-    for (int i = 0; i < size; i++)
-    {
-        std::cout << "\nОбъект №" << i + 1 << std::endl;
+    for (int i = 0; i < count; ++i) {
+        std::cout << "--- #" << i << " ---" << std::endl;
         items[i]->print();
     }
 }
 
-int Keeper::getSize() const
-{
-    return size;
+void Keeper::edit(int index) {
+    if (index < 0 || index >= count)
+        throw KeeperException("Invalid index for edit!");
+    items[index]->read();
 }
 
-void Keeper::saveToFile(const char* filename) const
-{
-    std::ofstream file(filename);
-
-    if (!file.is_open())
-        throw std::runtime_error("Не удалось открыть файл для сохранения.");
-
-    file << size << '\n';
-
-    for (int i = 0; i < size; i++)
-    {
-        if (Student* p = dynamic_cast<Student*>(items[i]))
-        {
-            file << "STUDENT\n"
-                << p->getFullName() << '\n'
-                << p->getGroup() << '\n'
-                << p->getSpecialty() << '\n'
-                << p->getCourse() << '\n'
-                << p->getAverageGrade() << '\n';
-        }
-        else if (Teacher* p = dynamic_cast<Teacher*>(items[i]))
-        {
-            file << "TEACHER\n"
-                << p->getFullName() << '\n'
-                << p->getGroups() << '\n'
-                << p->getSubjects() << '\n';
-        }
-        else if (Administrator* p =
-            dynamic_cast<Administrator*>(items[i]))
-        {
-            file << "ADMINISTRATOR\n"
-                << p->getFullName() << '\n'
-                << p->getPosition() << '\n'
-                << p->getPhone() << '\n'
-                << p->getResponsibilityArea() << '\n';
-        }
-    }
-
-    if (!file)
-        throw std::runtime_error("Ошибка записи в файл.");
-
-    std::cout << "Данные сохранены в файл." << std::endl;
+void Keeper::saveToFile(const char* filename) const {
+    std::ofstream out(filename);
+    if (!out.is_open())
+        throw KeeperException("Cannot open file for writing!");
+    out << count << std::endl;
+    for (int i = 0; i < count; ++i) items[i]->save(out);
+    out.close();
+    std::cout << "Data saved." << std::endl;
 }
 
-void Keeper::loadFromFile(const char* filename)
-{
-    std::ifstream file(filename);
+void Keeper::loadFromFile(const char* filename) {
+    std::ifstream in(filename);
+    if (!in.is_open())
+        throw KeeperException("Cannot open file for reading!");
 
-    if (!file.is_open())
-        throw std::runtime_error("Не удалось открыть файл для загрузки.");
+    for (int i = 0; i < count; ++i) delete items[i];
+    delete[] items;
+    items = nullptr;
+    count = 0;
+    capacity = 0;
 
-    int count;
+    int newCount;
+    in >> newCount;
+    in.ignore();
 
-    if (!(file >> count) || count < 0)
-        throw std::runtime_error("Некорректный файл.");
-
-    file.ignore(10000, '\n');
-
-    Keeper loaded;
-
-    for (int i = 0; i < count; i++)
-    {
+    for (int i = 0; i < newCount; ++i) {
         std::string type;
-
-        if (!std::getline(file, type))
-            throw std::runtime_error("Не удалось прочитать тип объекта.");
-
-        if (type == "STUDENT")
-        {
-            std::string fullName, group, specialty;
-            int course;
-            double averageGrade;
-
-            if (!std::getline(file, fullName) ||
-                !std::getline(file, group) ||
-                !std::getline(file, specialty) ||
-                !(file >> course >> averageGrade))
-                throw std::runtime_error("Ошибка чтения данных студента.");
-
-            file.ignore(10000, '\n');
-
-            loaded.add(new Student(
-                fullName, group, specialty, course, averageGrade));
-        }
-        else if (type == "TEACHER")
-        {
-            std::string fullName, groups, subjects;
-
-            if (!std::getline(file, fullName) ||
-                !std::getline(file, groups) ||
-                !std::getline(file, subjects))
-                throw std::runtime_error("Ошибка чтения данных преподавателя.");
-
-            loaded.add(new Teacher(fullName, groups, subjects));
-        }
-        else if (type == "ADMINISTRATOR")
-        {
-            std::string fullName, position, phone, area;
-
-            if (!std::getline(file, fullName) ||
-                !std::getline(file, position) ||
-                !std::getline(file, phone) ||
-                !std::getline(file, area))
-                throw std::runtime_error("Ошибка чтения данных сотрудника.");
-
-            loaded.add(new Administrator(
-                fullName, position, phone, area));
-        }
-        else
-        {
-            throw std::runtime_error("Неизвестный тип объекта в файле.");
-        }
+        std::getline(in, type);
+        Base* obj = nullptr;
+        if (type == "Student") obj = new Student();
+        else if (type == "Teacher") obj = new Teacher();
+        else if (type == "Administrator") obj = new Administrator();
+        else throw KeeperException("Unknown type in file: " + type);
+        obj->load(in);
+        add(obj);
     }
+    in.close();
+    std::cout << "Data loaded." << std::endl;
+}
 
-    Base** oldItems = items;
-    int oldSize = size;
-    int oldCapacity = capacity;
-
-    items = loaded.items;
-    size = loaded.size;
-    capacity = loaded.capacity;
-
-    loaded.items = oldItems;
-    loaded.size = oldSize;
-    loaded.capacity = oldCapacity;
-
-    std::cout << "Данные загружены из файла." << std::endl;
+int Keeper::getCount() const { return count; }
+Base* Keeper::getAt(int index) const {
+    if (index < 0 || index >= count) throw KeeperException("Invalid index!");
+    return items[index];
 }

@@ -1,37 +1,30 @@
 #pragma once
-
-#include "Base.h"
 #include <string>
+#include "Base.h"
 
-class Administrator : public Base
-{
+class Administrator : public Base {
 private:
-    std::string fullName;
     std::string position;
     std::string phone;
-    std::string responsibilityArea;
+    std::string responsibility;
 
 public:
     Administrator();
-
-    Administrator(const std::string& fullName,
-        const std::string& position,
-        const std::string& phone,
-        const std::string& responsibilityArea);
-
+    Administrator(const std::string& name, const std::string& position,
+        const std::string& phone, const std::string& responsibility);
     Administrator(const Administrator& other);
-
     ~Administrator() override;
 
-    void print() const override;
-
-    void setFullName(const std::string& fullName);
-    void setPosition(const std::string& position);
-    void setPhone(const std::string& phone);
-    void setResponsibilityArea(const std::string& responsibilityArea);
-
-    std::string getFullName() const;
+    void setPosition(const std::string& p);
     std::string getPosition() const;
+    void setPhone(const std::string& ph);
     std::string getPhone() const;
-    std::string getResponsibilityArea() const;
+    void setResponsibility(const std::string& r);
+    std::string getResponsibility() const;
+
+    void print() const override;
+    void read() override;
+    void save(std::ofstream& out) const override;
+    void load(std::ifstream& in) override;
+    std::string getType() const override;
 };

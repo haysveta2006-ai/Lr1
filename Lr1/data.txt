@@ -1,0 +1,20 @@
+3
+Student
+Ivanov Ivan
+1423
+Sistem analytic
+3
+4
+Teacher
+Petrov Petr
+2
+Sis
+sis
+2
+mat
+bio
+Administrator
+Anna
+Manager
+89110812043
+Office

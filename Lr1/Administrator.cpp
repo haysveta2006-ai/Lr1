@@ -1,86 +1,66 @@
 #include "Administrator.h"
-#include <iostream>
 
 Administrator::Administrator()
-    : fullName(""), position(""), phone(""), responsibilityArea("")
-{
-    std::cout << "Вызван конструктор Administrator без параметров" << std::endl;
+    : Base(), position(""), phone(""), responsibility("") {
+    std::cout << "[Administrator] Default constructor" << std::endl;
 }
 
-Administrator::Administrator(const std::string& fullName,
-    const std::string& position,
-    const std::string& phone,
-    const std::string& responsibilityArea)
-    : fullName(fullName),
-    position(position),
-    phone(phone),
-    responsibilityArea(responsibilityArea)
-{
-    std::cout << "Вызван конструктор Administrator с параметрами" << std::endl;
+Administrator::Administrator(const std::string& name, const std::string& position,
+    const std::string& phone, const std::string& responsibility)
+    : Base(name), position(position), phone(phone), responsibility(responsibility) {
+    std::cout << "[Administrator] Param constructor" << std::endl;
 }
 
 Administrator::Administrator(const Administrator& other)
-    : Base(other),
-    fullName(other.fullName),
-    position(other.position),
-    phone(other.phone),
-    responsibilityArea(other.responsibilityArea)
-{
-    std::cout << "Вызван конструктор копирования Administrator" << std::endl;
+    : Base(other), position(other.position), phone(other.phone),
+    responsibility(other.responsibility) {
+    std::cout << "[Administrator] Copy constructor" << std::endl;
 }
 
-Administrator::~Administrator()
-{
-    std::cout << "Вызван деструктор Administrator" << std::endl;
+Administrator::~Administrator() {
+    std::cout << "[Administrator] Destructor" << std::endl;
 }
 
-void Administrator::print() const
-{
-    std::cout << "Административный сотрудник:" << std::endl;
-    std::cout << "ФИО: " << fullName << std::endl;
-    std::cout << "Должность: " << position << std::endl;
-    std::cout << "Телефон: " << phone << std::endl;
-    std::cout << "Область ответственности: "
-        << responsibilityArea << std::endl;
+void Administrator::setPosition(const std::string& p) { position = p; }
+std::string Administrator::getPosition() const { return position; }
+void Administrator::setPhone(const std::string& ph) { phone = ph; }
+std::string Administrator::getPhone() const { return phone; }
+void Administrator::setResponsibility(const std::string& r) { responsibility = r; }
+std::string Administrator::getResponsibility() const { return responsibility; }
+
+void Administrator::print() const {
+    std::cout << "=== Administrator ===" << std::endl;
+    std::cout << "Full name: " << fullName << std::endl;
+    std::cout << "Position: " << position << std::endl;
+    std::cout << "Phone: " << phone << std::endl;
+    std::cout << "Responsibility area: " << responsibility << std::endl;
 }
 
-void Administrator::setFullName(const std::string& fullName)
-{
-    this->fullName = fullName;
+void Administrator::read() {
+    std::cout << "Enter full name: ";
+    std::cin.ignore();
+    std::getline(std::cin, fullName);
+    std::cout << "Enter position: ";
+    std::getline(std::cin, position);
+    std::cout << "Enter phone: ";
+    std::getline(std::cin, phone);
+    std::cout << "Enter responsibility area: ";
+    std::getline(std::cin, responsibility);
 }
 
-void Administrator::setPosition(const std::string& position)
-{
-    this->position = position;
+void Administrator::save(std::ofstream& out) const {
+    out << "Administrator" << std::endl;
+    out << fullName << std::endl;
+    out << position << std::endl;
+    out << phone << std::endl;
+    out << responsibility << std::endl;
 }
 
-void Administrator::setPhone(const std::string& phone)
-{
-    this->phone = phone;
+void Administrator::load(std::ifstream& in) {
+    std::getline(in, fullName);
+    std::getline(in, position);
+    std::getline(in, phone);
+    std::getline(in, responsibility);
 }
 
-void Administrator::setResponsibilityArea(
-    const std::string& responsibilityArea)
-{
-    this->responsibilityArea = responsibilityArea;
-}
-
-std::string Administrator::getFullName() const
-{
-    return fullName;
-}
-
-std::string Administrator::getPosition() const
-{
-    return position;
-}
-
-std::string Administrator::getPhone() const
-{
-    return phone;
-}
-
-std::string Administrator::getResponsibilityArea() const
-{
-    return responsibilityArea;
-}
+std::string Administrator::getType() const { return "Administrator"; }

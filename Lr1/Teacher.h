@@ -1,33 +1,32 @@
 #pragma once
-
-#include "Base.h"
 #include <string>
+#include "Base.h"
 
-class Teacher : public Base
-{
+class Teacher : public Base {
 private:
-    std::string fullName;
-    std::string groups;
-    std::string subjects;
+    std::string* groups;
+    int groupsCount;
+    std::string* subjects;
+    int subjectsCount;
 
 public:
     Teacher();
-
-    Teacher(const std::string& fullName,
-        const std::string& groups,
-        const std::string& subjects);
-
+    Teacher(const std::string& name,
+        const std::string* grps, int grpCount,
+        const std::string* subs, int subCount);
     Teacher(const Teacher& other);
-
     ~Teacher() override;
 
+    void setGroups(const std::string* grps, int count);
+    std::string* getGroups() const;
+    int getGroupsCount() const;
+    void setSubjects(const std::string* subs, int count);
+    std::string* getSubjects() const;
+    int getSubjectsCount() const;
+
     void print() const override;
-
-    void setFullName(const std::string& fullName);
-    void setGroups(const std::string& groups);
-    void setSubjects(const std::string& subjects);
-
-    std::string getFullName() const;
-    std::string getGroups() const;
-    std::string getSubjects() const;
+    void read() override;
+    void save(std::ofstream& out) const override;
+    void load(std::ifstream& in) override;
+    std::string getType() const override;
 };
