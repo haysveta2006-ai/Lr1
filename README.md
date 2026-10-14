@@ -29,3 +29,15 @@
 - **Среда разработки**: Microsoft Visual Studio 2022
 
 ## Структура проекта
+Lr1/
+├── Base.h / Base.cpp — абстрактный базовый класс
+├── Student.h / Student.cpp — класс «Студент»
+├── Teacher.h / Teacher.cpp — класс «Преподаватель»
+├── Administrator.h / Administrator.cpp — класс «Администратор»
+├── Keeper.h / Keeper.cpp — контейнер для хранения объектов
+└── main.cpp — точка входа и меню программы
+
+## Автор
+
+Студент группы 1423
+Хайдукова Светлана
